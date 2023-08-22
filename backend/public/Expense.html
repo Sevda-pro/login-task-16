@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Storing Data</title>
+  <!-- <link href="style.css" rel="stylesheet" type="text/css" /> -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+    integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    .leaderboard-button {
+      padding: 10px 10px;
+      font-size: 16px;
+      background-color: #7a8b82;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin: 5px 5px;
+    }
+
+    .leaderboard-button:hover {
+      background-color: #1f7a46;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Image and text -->
+  <nav class="navbar navbar-light bg-light">
+    <!-- <a class="navbar-brand" href="#"> -->
+    <!-- <img src="https://play.google.com/store/apps/details?id=com.nightonke.inc&hl=en_US" width="30" height="30" class="d-inline-block align-top" alt=""> -->
+    Expense Management
+    </a>
+  </nav>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- <a class="navbar-brand" href="#">Todo</a> -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <button id="rzpbutton">Buy Premium</button>
+        <div id="ispremium"></div>
+        <li class="nav-item active">
+          <div id="leaderboardDiv"></div>
+        </li>
+
+      </ul>
+      <form class="form-inline my-2 my-lg-0">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      </form>
+    </div>
+  </nav>
+
+  <div class="container">
+    <form>
+      <div class="form-group">
+        <label for="title">Selling Price</label>
+        <input type="number" class="form-control" id="title" aria-describedby="emailHelp">
+      </div>
+      <div class="form-group">
+        <label for="desc">Product Name</label>
+        <input type="text" class="form-control" id="desc">
+      </div>
+      <div class="form-group">
+        <label for="Category">Category</label>
+        <select name="Category" id="Category">
+          <option value="Electronics">Electronics</option>
+          <option value="Food Items">Food Items</option>
+          <option value="Skin care">Skin care</option>
+
+        </select>
+      </div>
+
+      <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+
+    </form>
+    <div id="Elec">
+      <h3>Electronics items</h3>
+    </div>
+    <hr>
+    <div id="Food">
+      <h3>Food Items</h3>
+    </div>
+    <hr>
+    <div id="care">
+      <h3>Skin care</h3>
+    </div>
+
+  </div>
+  <div id="unorderedList">
+
+  </div>
+  <script>
+    fetchData();
+    // { headers: { "Authorization": }}
+    function fetchData() {
+      const token = localStorage.getItem('token')
+      console.log("in expense", token)
+      axios.get('http://localhost:3001/expense/Alldata', { headers: { "Authorization": token } })
+        .then((response) => {
+          response.data.forEach(item => {
+            if (item.BelongsTo === "Electronics") {
+              myid1(item.Price, item.ProductName, item.BelongsTo);
+            } else if (item.BelongsTo === "Food Items") {
+              myid2(item.Price, item.ProductName, item.BelongsTo);
+            } else if (item.BelongsTo === "Skin care") {
+              myid3(item.Price, item.ProductName, item.BelongsTo);
+            }
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+
+
+    let title = document.getElementById("title");
+    let desc = document.getElementById("desc");
+    let Category = document.getElementById("Category");
+    submit.addEventListener("click", (e) => {
+      e.preventDefault()
+      // fetchData();
+      let titlec = title.value
+      let descc = desc.value
+      let info = Category.value
+      const token = localStorage.getItem('token')
+      config = {
+        method: 'POST',
+        url: 'http://localhost:3001/expense/create',
+        headers:
+          { "Authorization": token },
+        data: { Price: titlec, ProductName: descc, BelongsTo: info }
+      }
+      axios(config).then((res) => {
+        console.log(res)
+        if (info == "Electronics")
+          myid1(titlec, descc, info)
+        if (info == "Food Items")
+          myid2(titlec, descc, info)
+        if (info == "Skin care")
+          myid3(titlec, descc, info)
+      }).catch((error) => {
+        console.log(error)
+      });
+    })
+
+
+    function myid1(titlec, descc, info) {
+      let newEle = document.createElement("div");
+      newEle.innerHTML = ` <div id='${descc}'>
+    <p>${titlec} - ${descc} - ${info}  <button type="submit" class="btn btn-danger deletetn" onclick="myFunc('${descc}')">Delete</button></p>
+    </div>`
+      Elec.appendChild(newEle);
+
+      titlec = "";
+      descc = "";
+    }
+    function myid2(titlec, descc, info) {
+      let newEle = document.createElement("div");
+      newEle.innerHTML = ` <div id='${descc}'>
+   
+    <p>${titlec} - ${descc} - ${info}  <button type="submit" class="btn btn-danger deletetn" onclick="myFunc('${descc}')">Delete</button>       </p>
+    </div>`;
+      Food.appendChild(newEle);
+
+      titlec = "";
+      descc = "";
+    }
+    function myid3(titlec, descc, info) {
+      let newEle = document.createElement("div");
+      newEle.innerHTML = ` <div id='${descc}'>
+   
+    <p>${titlec} - ${descc} - ${info}  <button type="submit" class="btn btn-danger deletetn" onclick="myFunc('${descc}')">Delete</button>       </p>
+    </div>`;
+      care.appendChild(newEle);
+
+      titlec = "";
+      descc = "";
+    }
+    function myFunc(des) {
+      const token = localStorage.getItem('token')
+      axios.delete(`http://localhost:3001/expense/delete/${des}`, { headers: { "Authorization": token } })
+        .then((res) => {
+          console.log("hello sir")
+          console.log(res)
+          let x = document.getElementById(des);
+          x.remove();
+
+        }).catch((err) => {
+          console.log(err);
+        });
+    };
+    let rzpbutton = document.getElementById("rzpbutton")
+    let leaderboardDiv = document.getElementById("leaderboardDiv")
+    let v = localStorage.getItem("prime")
+    if (v === "true") {
+      rzpbutton.remove();
+      let newhead = document.createElement("h4");
+      newhead.textContent = "Premium user";
+      document.querySelector("#ispremium").appendChild(newhead);
+      let leaderBoardBtn = document.createElement("button");
+      leaderBoardBtn.appendChild(document.createTextNode("Leaderboard"));
+      leaderBoardBtn.classList.add("leaderboard-button");
+      leaderboardDiv.appendChild(leaderBoardBtn);
+      leaderBoardBtn.addEventListener("click", showleaderboard);
+    }
+    if (v === "false") {
+      rzpbutton.addEventListener("click", paymentProcess);
+
+      async function paymentProcess(e) {
+        try {
+          const token = localStorage.getItem("token");
+
+          const response = await axios.get("http://localhost:3001/purchase/premiummembership", { headers: { "Authorization": token } });
+          // console.log(response);
+
+          var options = {
+            key: response.data.key_id,
+            order_id: response.data.order.id,
+
+            handler: async function (response) {
+              const res = await axios.post(
+                "http://localhost:3001/purchase/updatetransactionstatus/success",
+                {
+                  order_id: options.order_id,
+                  payment_id: response.razorpay_payment_id,
+                },
+                { headers: { "Authorization": token } }
+              );
+              rzpbutton.remove();
+
+              let newhead = document.createElement("h3");
+              newhead.textContent = "you are a premium user now";
+              localStorage.setItem("prime", true);
+              document.querySelector("#ispremium").appendChild(newhead);
+              let leaderBoardBtn = document.createElement("button");
+              leaderBoardBtn.appendChild(document.createTextNode(" Here are the top expenses"));
+              leaderBoardBtn.classList.add("leaderboard-button");
+              leaderboardDiv.appendChild(leaderBoardBtn);
+              leaderBoardBtn.addEventListener("click", showleaderboard);
+              alert("you are a premium user now");
+
+            },
+          };
+          const rzp1 = new Razorpay(options);
+          rzp1.open();
+          e.preventDefault();
+          rzp1.on("payment.failed", async function (response) {
+            // console.log(error);
+
+            await axios.post(
+              "http://localhost:3001/purchase/updatetransactionstatus/failed",
+              {
+                order_id: response.error.metadata.order_id,
+                payment_id: response.error.metadata.payment_id,
+              },
+              { headers: { "Authorization": token } }
+            );
+            alert("something went wrong");
+          });
+        } catch (error) {
+          let errorDiv = document.createElement("div");
+          errorDiv.classList = "error";
+          // errorDiv.textContent = error.response.data.message;
+          document.body.appendChild(errorDiv);
+          setTimeout(() => {
+            errorDiv.remove();
+          }, 3001);
+        }
+      }
+    }
+    async function showleaderboard() {
+      try {
+        let unorderedList = document.createElement("ul");
+        let token = localStorage.getItem("token");
+        let newarr = await axios.get("http://localhost:3001/premium/leaderboard", { headers: { "Authorization": token } });
+        let arr = newarr.data;
+        console.log(newarr)
+        for (let i = 0; i < arr.length; i++) {
+          let li = document.createElement("li");
+          let text = document.createTextNode(`name: ${arr[i].Name} Total expenses: ${arr[i].total_expense}`);
+          li.appendChild(text);
+          document.getElementById("unorderedList").appendChild(li);
+        }
+
+      //   leaderboardDiv.appendChild(unorderedList);
+      } catch (error) {
+         console.log(error);
+     }
+    }
+  </script>
+</body>
+
+</html>

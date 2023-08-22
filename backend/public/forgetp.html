@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<!-- <link rel="stylesheet" href="forgot.css" /> -->
+		<title>Forgot Password</title>
+	</head>
+	<body>
+		<div class="container">
+			<h1>Forgot Your Password?</h1>
+			<p>No worries</p>
+			<p>Enter your email below to reset your password.</p>
+			
+			<form id="forgotForm" action="submit" method="post">
+				<label for="emailId">Email Address:</label>
+				<input type="email" name="email" id="emailId" required />
+				<button type="submit">Reset Password</button>
+			</form>
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	</body>
+</html>
+<script>
+let forgotForm = document.querySelector("#forgotForm");
+
+forgotForm.addEventListener("submit", forgot);
+
+async function forgot(e) {
+	e.preventDefault();
+    try {
+        let email = document.querySelector("#emailId").value;
+   let res =  await axios.post('http://localhost:3001/password/sendMail',{email});
+   let successmessg = document.createElement("div");
+		successmessg.classList = "success";
+		successmessg.appendChild(document.createTextNode(res.data.message));
+		setTimeout(() => successmessg.remove(), 4000);
+		document.body.appendChild(successmessg);
+		
+        
+    
+        
+    } catch (error) {
+		console.log(error);
+        let networkErr = document.createElement("div");
+		networkErr.classList = "error";
+		networkErr.appendChild(document.createTextNode(error.response.data.message));
+		setTimeout(() => networkErr.remove(), 3001);
+		document.body.appendChild(networkErr);
+    }
+
+}
+    </script>
+
+</html>
